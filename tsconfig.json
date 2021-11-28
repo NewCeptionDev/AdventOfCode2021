@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "strict": false,
+    "lib": ["dom", "es2019"]
+  },
+  "include": ["src", "examples/passThrough.ts"],
+  "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.temp.ts"]
+}
