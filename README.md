@@ -1,8 +1,8 @@
-# Advent of Code 2019 starter for JS/TS
+# Advent of Code 2021 
 
 ## Intro
 
-This repo contains zero-setup environment for [Advent of Code](https://adventofcode.com/2019) challenges, with:
+This repo contains zero-setup environment for [Advent of Code](https://adventofcode.com/2021) challenges, with:
 
 - automatic creation of a challenge template,
 - automatic execution of a challenge code (with reloads),
@@ -26,11 +26,6 @@ Using NPM:
 npm i
 ```
 
-Using Yarn:
-
-```
-yarn
-```
 
 ## Running dev mode
 
@@ -44,25 +39,9 @@ or
 yarn start day<N>
 ```
 
-Example:
-
-```
-yarn start day1
-```
-
 If the day folder does not exist, it will be created from template.
 
-## Join my leaderboard
-
-You can [join](https://adventofcode.com/2019/leaderboard/private) my private leaderboard fo JS/TS programmers:
-
-Code:
-
-```
-107172-b51ab08f
-```
 
 ## Languages used:
 
 - TypeScript
-- JavaScript
