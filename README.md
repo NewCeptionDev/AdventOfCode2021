@@ -1,47 +1,45 @@
 # Advent of Code 2021 
 
-## Intro
-
-This repo contains zero-setup environment for [Advent of Code](https://adventofcode.com/2021) challenges, with:
-
-- automatic creation of a challenge template,
-- automatic execution of a challenge code (with reloads),
-- quick utils for testing and reading input from a file.
+This repo contains all of my Solutions for the [Advent of Code 2021](https://adventofcode.com/2021) Challenges.
 
 ## Installation
 
 Clone the repo and go to the created folder:
 
 ```
-git clone https://github.com/caderek/aoc-starter-ts.git aoc2019
+git clone https://github.com/NewCeptionDev/AdventOfCode2021.git
 ```
 
 ```
-cd aoc2019
+cd AdventOfCode2021
 ```
 
-Using NPM:
+Install Dependencies:
 
 ```
 npm i
 ```
 
 
-## Running dev mode
+## Run
 
 ```
 npm start day<N>
 ```
 
-or
-
-```
-yarn start day<N>
-```
-
-If the day folder does not exist, it will be created from template.
-
 
 ## Languages used:
 
 - TypeScript
+
+<br>
+<br>
+
+## Template
+
+This Repository uses the Typescript Template from caderek found [here](https://github.com/caderek/aoc-starter-ts)
+It provides zero-setup environment for challenges, with:
+
+- automatic creation of a challenge template,
+- automatic execution of a challenge code (with reloads),
+- quick utils for testing and reading input from a file.
