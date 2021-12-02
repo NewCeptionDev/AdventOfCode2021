@@ -37,7 +37,7 @@ npm start day<N>
 
 ## Template
 
-This Repository uses the Typescript Template from caderek found [here](https://github.com/caderek/aoc-starter-ts)
+This Repository uses the Typescript Template from caderek found [here](https://github.com/caderek/aoc-starter-ts) <br>
 It provides zero-setup environment for challenges, with:
 
 - automatic creation of a challenge template,
