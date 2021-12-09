@@ -1,4 +1,5 @@
 import { test, readInput } from "../utils"
+import { splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -24,7 +25,7 @@ const parseOperation = (operation: string): OPERATION => {
 }
 
 const goA = (input) => {
-  const lines = input.split("\n");
+  const lines = splitToLines(input);
 
   let horizontalPosition = 0;
   let depth = 0;
@@ -52,7 +53,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines = input.split("\n");
+  const lines = splitToLines(input);
 
   let horizontalPosition = 0;
   let depth = 0;

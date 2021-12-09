@@ -1,5 +1,5 @@
 import { test, readInput } from "../utils"
-import { readInputFromSpecialFile } from "../utils/readInput"
+import { readInputFromSpecialFile, splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -94,7 +94,7 @@ const countPositionsWithAtLeastTwoLines = (oceanFloor: Map<number, Map<number, n
 }
 
 const goA = (input) => {
-  const lines = input.split("\n").filter(line => line !== "")
+  const lines = splitToLines(input)
 
   const cloudLines: CloudLine[] = lines.map(line => parseLine(line))
 
@@ -104,7 +104,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines = input.split("\n").filter(line => line !== "")
+  const lines = splitToLines(input)
 
   const cloudLines: CloudLine[] = lines.map(line => parseLine(line))
 

@@ -1,5 +1,5 @@
 import { test, readInput } from "../utils"
-import { readInputFromSpecialFile } from "../utils/readInput"
+import { readInputFromSpecialFile, splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -77,7 +77,7 @@ const findSegmentMapping = (display: Display) => {
 }
 
 const goA = (input) => {
-  const lines = input.split("\r\n").filter(line => line !== "")
+  const lines = splitToLines(input)
 
   const displays: Display[] = []
 
@@ -100,7 +100,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines = input.split("\r\n").filter(line => line !== "")
+  const lines = splitToLines(input)
 
   const displays: Display[] = []
 

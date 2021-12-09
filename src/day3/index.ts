@@ -1,4 +1,5 @@
 import { test, readInput } from "../utils"
+import { splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -44,7 +45,7 @@ const stringBitToInt = (bitArray: string[], inverted: boolean) => {
 }
 
 const goA = (input) => {
-  const lines = input.split("\n").map(val => val.trimEnd())
+  const lines = splitToLines(input).map(val => val.trimEnd())
 
   let valuesPerPosition: number[] = []
 
@@ -78,7 +79,7 @@ const filterByCriteriaUntilOneLeft = (criteria: CRITERIA, values: string[]): str
 }
 
 const goB = (input) => {
-  const lines = input.split("\n").map(value => value.trimEnd())
+  const lines = splitToLines(input).map(value => value.trimEnd())
 
   const oxygenRating = stringBitToInt(Array.from(filterByCriteriaUntilOneLeft(CRITERIA.MostCommon, lines)), false);
   const co2Rating = stringBitToInt(Array.from(filterByCriteriaUntilOneLeft(CRITERIA.LeastCommon, lines)), false);

@@ -1,5 +1,5 @@
 import { test, readInput } from "../utils"
-import { readInputFromSpecialFile } from "../utils/readInput"
+import { readInputFromSpecialFile, splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -70,7 +70,7 @@ const checkIfBoardWon = (board: number[], drawnTillNow: number[]): boolean => {
 }
 
 const goA = (input) => {
-  const lines = input.split("\n");
+  const lines = splitToLines(input);
 
   const drawOrder: number[] = lines[0].split(",").map(number => parseInt(number.trimStart()));
 
@@ -95,7 +95,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines = input.split("\n");
+  const lines = splitToLines(input);
 
   const drawOrder: number[] = lines[0].split(",").map(number => parseInt(number.trimStart()));
 

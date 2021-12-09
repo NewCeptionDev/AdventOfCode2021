@@ -1,11 +1,12 @@
 import { test, readInput } from "../utils"
+import { splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
 const input = prepareInput(readInput())
 
 const goA = (input) => {
-  const lines: string[] = input.split("\n");
+  const lines: string[] = splitToLines(input);
 
   let lastMeasurement: number | undefined = undefined;
   let timesOfIncreases: number = 0;
@@ -25,7 +26,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines: string[] = input.split("\n");
+  const lines: string[] = splitToLines(input);
 
   const parsedLines: number[] = lines.filter(line => line !== "").map(line => parseInt(line));
 

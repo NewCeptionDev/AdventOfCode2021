@@ -1,5 +1,5 @@
 import { test, readInput } from "../utils"
-import { readInputFromSpecialFile } from "../utils/readInput"
+import { readInputFromSpecialFile, splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
 
@@ -92,7 +92,7 @@ const getSmallestElementIndex = (array: number[]): number => {
 }
 
 const goA = (input) => {
-  const lines = input.split("\n").filter(line => line !== "")
+  const lines = splitToLines(input);
 
   const area: number[][] = parseArea(lines)
 
@@ -100,7 +100,7 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  const lines = input.split("\n").filter(line => line !== "")
+  const lines = splitToLines(input)
 
   const area: number[][] = parseArea(lines)
 
