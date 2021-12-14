@@ -104,9 +104,9 @@ const toPrintableArray = (dots: Dot[]): string[] => {
     let stringRep: string = ""
     for (let x = minimumX; x <= maximumX; x++) {
       if (dotsOnMap.get(y).has(x)) {
-        stringRep += "#"
+        stringRep += "█"
       } else {
-        stringRep += "."
+        stringRep += " "
       }
     }
 
@@ -154,4 +154,5 @@ const resultB = goB(input)
 console.timeEnd("Time")
 
 console.log("Solution to part 1:", resultA)
-console.log("Solution to part 2:", resultB)
+console.log("Solution to part 2:")
+console.log(resultB)
