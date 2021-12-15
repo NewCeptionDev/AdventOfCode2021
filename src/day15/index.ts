@@ -10,11 +10,6 @@ interface Position {
   y: number;
 }
 
-interface LowestRiskPath {
-  totalRiskToPath: number;
-  path: Position[];
-}
-
 const parseArea = (lines: string[]): number[][] => {
   return lines.map(line => Array.from(line).map(value => parseInt(value)).filter(value => value !== undefined))
 }
@@ -42,11 +37,11 @@ const getNeighboursOfPosition = (position: Position, maxX: number, maxY: number)
 }
 
 const findLowestRiskPathToEnd = (area: number[][]) => {
-  const calculatedPaths: Map<number, Map<number, LowestRiskPath>> = new Map<number, Map<number, LowestRiskPath>>()
+  const calculatedPaths: Map<number, Map<number, number>> = new Map<number, Map<number, number>>()
   const positionsToCheck: Position[] = []
 
-  calculatedPaths.set(0, new Map<number, LowestRiskPath>())
-  calculatedPaths.get(0).set(0, { path: [{ x: 0, y: 0 }], totalRiskToPath: 0 })
+  calculatedPaths.set(0, new Map<number, number>())
+  calculatedPaths.get(0).set(0, 0)
   positionsToCheck.push({ x: 0, y: 0 })
 
   for (let position of positionsToCheck) {
@@ -55,23 +50,20 @@ const findLowestRiskPathToEnd = (area: number[][]) => {
     const pathToPosition = calculatedPaths.get(position.y).get(position.x)
 
     for (let neighbour of neighbours) {
-      let riskToNeighbour = pathToPosition.totalRiskToPath + area[neighbour.y][neighbour.x]
-      let pathToNeighbour = pathToPosition.path.slice(0)
-      pathToNeighbour.push(neighbour)
+      let riskToNeighbour = pathToPosition + area[neighbour.y][neighbour.x]
 
       if (calculatedPaths.has(neighbour.y) && calculatedPaths.get(neighbour.y).has(neighbour.x)) {
-        if (calculatedPaths.get(neighbour.y).get(neighbour.x).totalRiskToPath > riskToNeighbour) {
-          calculatedPaths.get(neighbour.y).get(neighbour.x).totalRiskToPath = riskToNeighbour
-          calculatedPaths.get(neighbour.y).get(neighbour.x).path = pathToNeighbour
+        if (calculatedPaths.get(neighbour.y).get(neighbour.x) > riskToNeighbour) {
+          calculatedPaths.get(neighbour.y).set(neighbour.x, riskToNeighbour)
           positionsToCheck.push(neighbour)
         }
       } else {
         if (!calculatedPaths.has(neighbour.y)) {
-          calculatedPaths.set(neighbour.y, new Map<number, LowestRiskPath>())
+          calculatedPaths.set(neighbour.y, new Map<number, number>())
         }
 
         if (!calculatedPaths.get(neighbour.y).has(neighbour.x)) {
-          calculatedPaths.get(neighbour.y).set(neighbour.x, { path: pathToNeighbour, totalRiskToPath: riskToNeighbour })
+          calculatedPaths.get(neighbour.y).set(neighbour.x, riskToNeighbour)
           positionsToCheck.push(neighbour)
         }
       }
@@ -106,7 +98,7 @@ const goA = (input) => {
   const lines = splitToLines(input)
   const area = parseArea(lines)
 
-  return findLowestRiskPathToEnd(area).totalRiskToPath
+  return findLowestRiskPathToEnd(area)
 }
 
 const goB = (input) => {
@@ -114,7 +106,7 @@ const goB = (input) => {
   const area = parseArea(lines)
   const fullArea = buildFullArea(area)
 
-  return findLowestRiskPathToEnd(fullArea).totalRiskToPath
+  return findLowestRiskPathToEnd(fullArea)
 }
 
 /* Tests */
