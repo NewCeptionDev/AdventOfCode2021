@@ -1,4 +1,4 @@
-import { test, readInput } from "../utils"
+import { readInput, test } from "../utils"
 import { readInputFromSpecialFile, splitToLines } from "../utils/readInput"
 
 const prepareInput = (rawInput: string) => rawInput
@@ -40,15 +40,47 @@ const parseInstruction = (line: string): Instruction => {
   }
 }
 
+const parseStartAndEndPointsToArray = (area1: Area, area2: Area): Area[] => {
+  let res: Area[] = []
+
+  const comparator = (a, b) => a - b
+
+  const xArray: number[] = [area1.fromX, area2.fromX, area1.toX, area2.toX]
+  xArray.sort(comparator)
+
+  const yArray: number[] = [area1.fromY, area2.fromY, area1.toY, area2.toY]
+  yArray.sort(comparator)
+
+  const zArray: number[] = [area1.fromZ, area2.fromZ, area1.toZ, area2.toZ]
+  zArray.sort(comparator)
+
+  let xParts: number[][] = []
+  xParts.push([xArray[0], xArray[1]])
+  xParts.push([xArray[1], xArray[2]])
+  xParts.push([xArray[2], xArray[3]])
+
+  let yParts: number[][] = []
+  yParts.push([yArray[0], yArray[1]])
+  yParts.push([yArray[1], yArray[2]])
+  yParts.push([yArray[2], yArray[3]])
+
+  let zParts: number[][] = []
+  zParts.push([zArray[0], zArray[1]])
+  zParts.push([zArray[1], zArray[2]])
+  zParts.push([zArray[2], zArray[3]])
+
+  return res
+}
+
 const areaIntersectsWithInstruction = (area1: Area, area2: Area) => {
   /*return ((area1.fromX <= area2.fromX && area1.toX >= area2.toX) || (area1.fromX >= area2.fromX && area1.toX >= area2.toX) || (area1.fromX <= area2.fromX && area1.toX <= area2.toX) || (area1.fromX >= area2.fromX && area1.toX <= area2.toX)
   || ((area1.fromY <= area2.fromY && area1.toX >= area2.toX) || (area1.fromY >= area2.fromY && area1.toX >= area2.toX) || (area1.fromY <= area2.fromY && area1.toX <= area2.toY) || (area1.fromY >= area2.fromY && area1.toX <= area2.toX) */
-  return !((area1.fromX > area2.toX || area1.toX < area2.fromX) || (area1.fromY > area2.toY || area1.toY < area2.fromY) || (area1.fromZ > area2.toZ || area1.toZ < area2.fromZ));
+  return !((area1.fromX > area2.toX || area1.toX < area2.fromX) || (area1.fromY > area2.toY || area1.toY < area2.fromY) || (area1.fromZ > area2.toZ || area1.toZ < area2.fromZ))
 }
 
 const mergeAreasIfNeeded = (area1: Area, area2: Area): Area[] => {
-  const xIntersection = area1.fromX <= area2.toX || area1.toX >= area2.fromX;
-  const yIntersection = area1.fromY <= area2.toY || area1.toY >= area2.fromY;
+  const xIntersection = area1.fromX <= area2.toX || area1.toX >= area2.fromX
+  const yIntersection = area1.fromY <= area2.toY || area1.toY >= area2.fromY
   const zIntersection = area1.fromZ <= area2.toZ || area1.toZ >= area2.fromZ;
   if(xIntersection || yIntersection || zIntersection) {
     let mergedAreas: Area[] = [];
