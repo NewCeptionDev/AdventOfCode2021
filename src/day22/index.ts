@@ -15,7 +15,7 @@ interface Area {
 }
 
 interface Instruction {
-  on: boolean;
+  sign: number;
   area: Area;
 }
 
@@ -28,7 +28,7 @@ const parseInstruction = (line: string): Instruction => {
   const zRange: string[] = coordinationParts[2].split("=")[1].split("..")
 
   return {
-    on: onInstruction,
+    sign: onInstruction ? 1 : -1,
     area: {
       fromX: parseInt(xRange[0]),
       toX: parseInt(xRange[1]),
@@ -39,282 +39,43 @@ const parseInstruction = (line: string): Instruction => {
     },
   }
 }
-
-const parseStartAndEndPointsToArray = (area1: Area, area2: Area): Area[] => {
-  let res: Area[] = []
-
-  const comparator = (a, b) => a - b
-
-  const xArray: number[] = [area1.fromX, area2.fromX, area1.toX, area2.toX]
-  xArray.sort(comparator)
-
-  const yArray: number[] = [area1.fromY, area2.fromY, area1.toY, area2.toY]
-  yArray.sort(comparator)
-
-  const zArray: number[] = [area1.fromZ, area2.fromZ, area1.toZ, area2.toZ]
-  zArray.sort(comparator)
-
-  let xParts: number[][] = []
-  xParts.push([xArray[0], xArray[1]])
-  xParts.push([xArray[1], xArray[2]])
-  xParts.push([xArray[2], xArray[3]])
-
-  let yParts: number[][] = []
-  yParts.push([yArray[0], yArray[1]])
-  yParts.push([yArray[1], yArray[2]])
-  yParts.push([yArray[2], yArray[3]])
-
-  let zParts: number[][] = []
-  zParts.push([zArray[0], zArray[1]])
-  zParts.push([zArray[1], zArray[2]])
-  zParts.push([zArray[2], zArray[3]])
-
-  return res
-}
-
-const areaIntersectsWithInstruction = (area1: Area, area2: Area) => {
-  /*return ((area1.fromX <= area2.fromX && area1.toX >= area2.toX) || (area1.fromX >= area2.fromX && area1.toX >= area2.toX) || (area1.fromX <= area2.fromX && area1.toX <= area2.toX) || (area1.fromX >= area2.fromX && area1.toX <= area2.toX)
-  || ((area1.fromY <= area2.fromY && area1.toX >= area2.toX) || (area1.fromY >= area2.fromY && area1.toX >= area2.toX) || (area1.fromY <= area2.fromY && area1.toX <= area2.toY) || (area1.fromY >= area2.fromY && area1.toX <= area2.toX) */
-  return !((area1.fromX > area2.toX || area1.toX < area2.fromX) || (area1.fromY > area2.toY || area1.toY < area2.fromY) || (area1.fromZ > area2.toZ || area1.toZ < area2.fromZ))
-}
-
-const mergeAreasIfNeeded = (area1: Area, area2: Area): Area[] => {
-  const xIntersection = area1.fromX <= area2.toX || area1.toX >= area2.fromX
-  const yIntersection = area1.fromY <= area2.toY || area1.toY >= area2.fromY
-  const zIntersection = area1.fromZ <= area2.toZ || area1.toZ >= area2.fromZ;
-  if(xIntersection || yIntersection || zIntersection) {
-    let mergedAreas: Area[] = [];
-
-  } else {
-    return [];
-  }
-}
-
 const goA = (input) => {
   const lines = splitToLines(input)
-  const instructions: Instruction[] = lines.map(line => parseInstruction(line));
+  const instructions: Instruction[] = lines.map(line => parseInstruction(line))
 
-  const turnedOnCubeAreas: Area[] = [];
+  const area: number[][][] = []
 
-  let i = 0;
-  for(let instruction of instructions) {
-    const intersectingAreas: Area[] = turnedOnCubeAreas.filter(area => areaIntersectsWithInstruction(area, instruction.area))
-
-    if(intersectingAreas.length === 0) {
-      if(instruction.on) {
-        turnedOnCubeAreas.push(instruction.area);
+  for (let x = -50; x <= 50; x++) {
+    let yArr: number[][] = []
+    for (let y = -50; y <= 50; y++) {
+      let zArr: number[] = []
+      for (let z = -50; z <= 50; z++) {
+        zArr.push(0)
       }
-    } else {
-      if(instruction.on) {
-        for(let intersectArea of intersectingAreas) {
-          if(instruction.area.fromX < intersectArea.fromX) {
-            intersectArea.fromX = instruction.area.fromX;
-          }
-          if(instruction.area.toX > intersectArea.toX) {
-            intersectArea.toX = instruction.area.toX;
-          }
-          if(instruction.area.fromY < intersectArea.fromY) {
-            intersectArea.fromY = instruction.area.fromY;
-          }
-          if(instruction.area.toY > intersectArea.toY) {
-            intersectArea.toY = instruction.area.toY;
-          }
-          if(instruction.area.fromZ < intersectArea.fromZ) {
-            intersectArea.fromZ = instruction.area.fromZ;
-          }
-          if(instruction.area.toZ > intersectArea.toZ) {
-            intersectArea.toZ = instruction.area.toZ;
-          }
-        }
+      yArr.push(zArr)
+    }
+    area.push(yArr)
+  }
 
-        //Merge
-      } else {
-        for(let intersectArea of intersectingAreas) {
-          let newFromX = intersectArea.fromX;
-          let newToX = intersectArea.toX;
-          let newFromY = intersectArea.fromY;
-          let newToY = intersectArea.toY;
-          let newFromZ = intersectArea.fromZ;
-          let newToZ = intersectArea.toZ;
-          if(instruction.area.toX > intersectArea.fromX && instruction.area.toX < intersectArea.toX) {
-            newFromX = instruction.area.toX;
-          }
-          if(instruction.area.toY > intersectArea.fromY && instruction.area.toY < intersectArea.toY) {
-            newFromY = instruction.area.toY;
-          }
-          if(instruction.area.toZ > intersectArea.fromZ && instruction.area.toZ < intersectArea.toZ) {
-            newFromZ = instruction.area.toZ;
-          }
-          if(instruction.area.fromX < intersectArea.toX && instruction.area.fromX > intersectArea.fromX) {
-            newToX = instruction.area.fromX;
-          }
-          if(instruction.area.fromY < intersectArea.toY && instruction.area.fromY > intersectArea.fromY) {
-            newToY = instruction.area.fromY;
-          }
-          if(instruction.area.fromZ < intersectArea.toZ && instruction.area.fromZ > intersectArea.fromZ) {
-            newToZ = instruction.area.fromZ;
-          }
-          if(instruction.area.fromX > intersectArea.fromX && instruction.area.toX < intersectArea.toX) {
-            newFromX = instruction.area.toX;
-            newToX = instruction.area.fromX;
-          }
-          if(instruction.area.fromY > intersectArea.fromY && instruction.area.toY < intersectArea.toY) {
-            newFromY = instruction.area.toY;
-            newToY = instruction.area.fromY;
-          }
-          if(instruction.area.fromZ > intersectArea.fromZ && instruction.area.toZ < intersectArea.toZ) {
-            newFromZ = instruction.area.toZ;
-            newToZ = instruction.area.fromZ;
-          }
-
-          if(newFromX > newToX || newFromY > newToY || newFromZ > newToZ) {
-            turnedOnCubeAreas.splice(turnedOnCubeAreas.indexOf(intersectArea, 1))
-
-            if (newFromX > newToX && newFromY > newToY && newFromZ > newToZ) {
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY,
-                toY: newToY //-1?
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: newFromY,
-                toY: intersectArea.toY
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: newToZ,
-                fromY: newToY,
-                toY: newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: newFromZ,
-                toZ: intersectArea.toZ,
-                fromY: newToY,
-                toY: newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: newToX,
-                fromZ: newToZ,
-                toZ: newFromZ,
-                fromY: newToY,
-                toY: newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newToX,
-                toX: intersectArea.toX,
-                fromZ: newToZ,
-                toZ: newFromZ,
-                fromY: newToY,
-                toY: newFromY
-              })
-            } else if(newFromX > newToX && newFromZ > newToZ) {
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: newFromY,
-                toY: newToY
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: newToX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newFromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newToX,
-                toX: newFromX,
-                fromZ: intersectArea.fromZ,
-                toZ: newToZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newToX,
-                toX: newFromX,
-                fromZ: newFromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-            } else if(newFromX > newToX) {
-              console.log("X Intersecton with", newFromY > newToY, newFromZ > newToZ)
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: newFromY,
-                toY: newToY
-              })
-              turnedOnCubeAreas.push({
-                fromX: intersectArea.fromX,
-                toX: newToX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newFromX,
-                toX: intersectArea.toX,
-                fromZ: intersectArea.fromZ,
-                toZ: intersectArea.toZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-              turnedOnCubeAreas.push({
-                fromX: newToX,
-                toX: newFromX,
-                fromZ: intersectArea.fromZ === newFromZ ? newToZ : intersectArea.fromZ,
-                toZ: intersectArea.fromX === newFromZ ? intersectArea.toZ : newFromZ,
-                fromY: intersectArea.fromY === newFromY ? newToY : intersectArea.fromY,
-                toY: intersectArea.fromY === newFromY ? intersectArea.toY : newFromY
-              })
-            } else {
-              console.error("Just partial within")
-            }
-          } else {
-            intersectArea.fromX = newFromX;
-            intersectArea.toX = newToX;
-            intersectArea.fromY = newFromY;
-            intersectArea.toY = newToY;
-            intersectArea.fromZ = newFromZ;
-            intersectArea.toZ = newToZ;
+  for (let instruction of instructions) {
+    if (instruction.area.fromX >= -50 && instruction.area.toX <= 50 && instruction.area.fromY >= -50 && instruction.area.toY <= 50 && instruction.area.fromZ >= -50 && instruction.area.toZ <= 50) {
+      for (let x = instruction.area.fromX; x <= instruction.area.toX; x++) {
+        for (let y = instruction.area.fromY; y <= instruction.area.toY; y++) {
+          for (let z = instruction.area.fromZ; z <= instruction.area.toZ; z++) {
+            area[x + 50][y + 50][z + 50] = instruction.sign === 1 ? 1 : 0
           }
         }
       }
     }
   }
 
-  let litCubes: number = 0;
+  let litCubes: number = 0
 
-  for(let area of turnedOnCubeAreas) {
-    if(area.fromX >= -50 && area.toX <= 50 && area.fromY >= -50 && area.toY <= 50 && area.fromZ >= -50 && area.toZ <= 50) {
-      litCubes += Math.abs((area.toX - area.fromX)) * Math.abs((area.toY - area.fromY)) * Math.abs((area.toZ - area.fromZ));
+  for (let x = -50; x <= 50; x++) {
+    for (let y = -50; y <= 50; y++) {
+      for (let z = -50; z <= 50; z++) {
+        litCubes += area[x + 50][y + 50][z + 50]
+      }
     }
   }
 
@@ -322,19 +83,61 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  return
+  const lines = splitToLines(input)
+  const instructions: Instruction[] = lines.map(line => parseInstruction(line))
+
+  const areas: Map<Area, number> = new Map<Area, number>()
+
+  for (let instruction of instructions) {
+    for (let area of Array.from(areas.keys())) {
+      let maxFromX: number = Math.max(instruction.area.fromX, area.fromX)
+      let minToX: number = Math.min(instruction.area.toX, area.toX)
+      let maxFromY: number = Math.max(instruction.area.fromY, area.fromY)
+      let minToY: number = Math.min(instruction.area.toY, area.toY)
+      let maxFromZ: number = Math.max(instruction.area.fromZ, area.fromZ)
+      let minToZ: number = Math.min(instruction.area.toZ, area.toZ)
+
+      if (maxFromX <= minToX && maxFromY <= minToY && maxFromZ <= minToZ) {
+        let sameInstruction = Array.from(areas.keys()).find(area => area.fromX === maxFromX && area.toX === minToX && area.fromY === maxFromY && area.toY === minToY && area.fromZ === maxFromZ && area.toZ === minToZ)
+        if (sameInstruction) {
+          areas.set(sameInstruction, areas.get(sameInstruction) - areas.get(area))
+        } else {
+          areas.set({
+            fromX: maxFromX,
+            toX: minToX,
+            fromY: maxFromY,
+            toY: minToY,
+            fromZ: maxFromZ,
+            toZ: minToZ,
+          }, -1 * areas.get(area))
+        }
+      }
+    }
+
+    if (instruction.sign > 0) {
+      let sameInstruction = Array.from(areas.keys()).find(area => area.fromX === instruction.area.fromX && area.toX === instruction.area.toX && area.fromY === instruction.area.fromY && area.toY === instruction.area.toY && area.fromZ === instruction.area.fromZ && area.toZ === instruction.area.toZ)
+      if (sameInstruction) {
+        areas.set(sameInstruction, areas.get(sameInstruction) + 1)
+      } else {
+        areas.set(instruction.area, 1)
+      }
+    }
+  }
+
+  return Array.from(areas.keys()).map(area => (area.toX - area.fromX + 1) * (area.toY - area.fromY + 1) * (area.toZ - area.fromZ + 1) * areas.get(area)).reduce((previousValue, currentValue) => previousValue + currentValue, 0)
 }
 
 /* Tests */
 
 test(goA(prepareInput(readInputFromSpecialFile("testInput.txt"))), 590784)
+test(goB(prepareInput(readInputFromSpecialFile("testInputPart2.txt"))), 2758514936282235)
 
 /* Results */
 
 console.time("Time")
-//const resultA = goA(input)
+const resultA = goA(input)
 const resultB = goB(input)
 console.timeEnd("Time")
 
-//console.log("Solution to part 1:", resultA)
+console.log("Solution to part 1:", resultA)
 console.log("Solution to part 2:", resultB)
