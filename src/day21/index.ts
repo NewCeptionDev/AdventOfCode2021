@@ -5,12 +5,25 @@ const prepareInput = (rawInput: string) => rawInput
 
 const input = prepareInput(readInput())
 
-interface Player {
+interface PositionAndScore {
   position: number;
   score: number;
 }
 
-const movePlayer = (player: Player, dice: number): { timesMoved: number, won: boolean, newDice: number } => {
+interface PositionAndScorePair {
+  left: PositionAndScore;
+  right: PositionAndScore;
+}
+
+interface GameState {
+  player1Score: number;
+  player2Score: number;
+  player1Position: number;
+  player2Position: number;
+  playersTurn: number;
+}
+
+const movePlayer = (player: PositionAndScore, dice: number): { timesMoved: number, won: boolean, newDice: number } => {
   let fullPositionMove: number = dice * 3 + 3
 
   if (dice >= 99) {
@@ -57,12 +70,15 @@ const getAmountOfDimensionsWithStepCount = (stepCount: number): number => {
       return 3
     case 9:
       return 1
+    default:
+      console.error("Amount with undefined Step Count", stepCount)
+      return 1;
   }
 }
 
 const goA = (input) => {
   const lines = splitToLines(input)
-  const players: Player[] = []
+  const players: PositionAndScore[] = []
 
   for (let line of lines) {
     players.push({
@@ -87,69 +103,44 @@ const goA = (input) => {
   return diceRolled * players.find(player => player.score < 1000).score
 }
 
-const updateDimensions = (dimensions: Map<Player[], number>): Map<Player[], number> => {
-  const newDimensions: Map<Player[], number> = new Map<Player[], number>()
-  for (let key of Array.from(dimensions.keys())) {
-    if (key[0].score < 21 && key[1].score < 21) {
-      for (let steps = 3; steps <= 9; steps++) {
-        let newPlayer1Position = (key[0].position + steps) % 10
-        newPlayer1Position = newPlayer1Position === 0 ? 10 : newPlayer1Position
 
-        const player1Wins = key[0].score + newPlayer1Position >= 21
-
-        if (!player1Wins) {
-          for (let steps2 = 3; steps2 <= 9; steps2++) {
-            let newPlayer2Position = (key[1].position + steps2) % 10
-            let dimensionInMap = Array.from(newDimensions.keys()).find(dimension => dimension[0]?.position === newPlayer1Position && dimension[0]?.score === key[0].score + newPlayer1Position && dimension[1]?.position === newPlayer2Position && dimension[1]?.score === key[1].score + newPlayer2Position)
-
-            if (!dimensionInMap) {
-              dimensionInMap = [{
-                position: newPlayer1Position,
-                score: key[0].score + newPlayer1Position,
-              },
-                {
-                  position: newPlayer2Position,
-                  score: key[1].score + (key[1].position !== newPlayer2Position ? newPlayer2Position : 0),
-                }]
-              newDimensions.set(dimensionInMap, 0)
-            }
-
-            newDimensions.set(dimensionInMap, newDimensions.get(dimensionInMap) + dimensions.get(key) * getAmountOfDimensionsWithStepCount(steps))
-          }
-        } else {
-
-          let dimensionInMap = Array.from(newDimensions.keys()).find(dimension => dimension[0]?.position === newPlayer1Position && dimension[0]?.score === key[0].score + newPlayer1Position && dimension[1]?.position === key[1].position && dimension[1]?.score === key[1].score)
-
-          if (!dimensionInMap) {
-            dimensionInMap = [{
-              position: newPlayer1Position,
-              score: key[0].score + newPlayer1Position,
-            },
-              {
-                position: key[1].position,
-                score: key[1].score,
-              }]
-            newDimensions.set(dimensionInMap, 0)
-          }
-
-          newDimensions.set(dimensionInMap, newDimensions.get(dimensionInMap) + dimensions.get(key) * getAmountOfDimensionsWithStepCount(steps))
-        }
-      }
-    } else {
-      if (!newDimensions.has(key)) {
-        newDimensions.set(key, dimensions.get(key))
-      } else {
-        newDimensions.set(key, newDimensions.get(key) + dimensions.get(key))
-      }
-    }
+const calculateStep = (state: GameState, cache: Map<GameState, number[]>) : number[] => {
+  let cacheState: GameState = Array.from(cache.keys()).find(cacheState => cacheState.player1Score === state.player1Score && cacheState.player2Score === state.player2Score && cacheState.playersTurn === state.playersTurn && cacheState.player1Position === state.player1Position && cacheState.player2Position === state.player2Position)
+  if(cacheState) {
+    return cache.get(cacheState)
   }
 
-  return newDimensions
+  if(state.player1Score >= 21) {
+    return [1, 0]
+  }
+
+  if(state.player2Score >= 21) {
+    return [0, 1]
+  }
+
+  let sums = [0, 0];
+  for(let step = 3; step <= 9; step++) {
+    let newPlayerPosition = state.playersTurn === 1 ? (state.player1Position + step) % 10 : (state.player2Position + step) % 10;
+    newPlayerPosition = newPlayerPosition === 0 ? 10 : newPlayerPosition;
+    const result: number[] = calculateStep({
+      playersTurn: state.playersTurn === 1 ? 2 : 1,
+      player1Position: state.playersTurn === 1 ? newPlayerPosition : state.player1Position,
+      player2Position: state.playersTurn === 2 ? newPlayerPosition : state.player2Position,
+      player1Score: state.playersTurn === 1 ? state.player1Score + newPlayerPosition : state.player1Score,
+      player2Score: state.playersTurn === 2 ? state.player2Score + newPlayerPosition : state.player2Score
+    }, cache);
+    sums[0] = sums[0] + result[0] * getAmountOfDimensionsWithStepCount(step)
+    sums[1] = sums[1] + result[1] * getAmountOfDimensionsWithStepCount(step)
+  }
+
+  cache.set(state, sums);
+
+  return sums;
 }
 
 const goB = (input) => {
   const lines = splitToLines(input)
-  const players: Player[] = []
+  const players: PositionAndScore[] = []
 
   for (let line of lines) {
     players.push({
@@ -158,20 +149,16 @@ const goB = (input) => {
     })
   }
 
-  let dimensions: Map<Player[], number> = new Map<Player[], number>()
+  const cache: Map<GameState, number[]> = new Map<GameState, number[]>();
+  const result: number[]= calculateStep({
+    playersTurn: 1,
+    player1Score: 0,
+    player2Score: 0,
+    player1Position: players[0].position,
+    player2Position: players[1].position
+  }, cache)
 
-  dimensions.set(players, 1)
-
-  while (Array.from(dimensions.keys()).find(dimension => dimension[0].score < 21 && dimension[1].score < 21)) {
-    dimensions = updateDimensions(dimensions)
-  }
-
-  console.log(dimensions)
-
-  const player1DimensionsWon: number = Array.from(dimensions.keys()).filter(dimension => dimension[0].score >= 21).map(key => dimensions.get(key)).reduce((previousValue, currentValue) => previousValue + currentValue, 0)
-  const player2DimensionsWon: number = Array.from(dimensions.keys()).filter(dimension => dimension[1].score >= 21).map(key => dimensions.get(key)).reduce((previousValue, currentValue) => previousValue + currentValue, 0)
-
-  return player1DimensionsWon > player2DimensionsWon ? player1DimensionsWon : player2DimensionsWon
+  return result[0] > result[1] ? result[0] : result[1]
 }
 
 /* Tests */
@@ -182,9 +169,9 @@ test(goB(prepareInput(readInputFromSpecialFile("testInput.txt"))), 4443560927763
 /* Results */
 
 console.time("Time")
-//const resultA = goA(input)
-//const resultB = goB(input)
+const resultA = goA(input)
+const resultB = goB(input)
 console.timeEnd("Time")
 
-//console.log("Solution to part 1:", resultA)
-//console.log("Solution to part 2:", resultB)
+console.log("Solution to part 1:", resultA)
+console.log("Solution to part 2:", resultB)
