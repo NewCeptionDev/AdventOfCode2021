@@ -75,11 +75,13 @@ const reduceStates = (states: {}) => {
     if (temp[states[state]] === undefined || parseInt(temp[states[state]]) < parseInt(state)) {
       temp[states[state]] = state
     }
+    delete states[state]
   }
 
   const temp2: object = {}
   for (let key of Object.keys(temp)) {
     temp2[temp[key]] = key.split(",").map(value => parseInt(value))
+    delete temp[key]
   }
 
   return temp2
@@ -104,10 +106,19 @@ const applyInstructionsToInputs = (instructions: Instruction[], currentAluStates
             const newValue = currentAluStates[values].slice(0)
             newValue[instruction.operand1] = i
 
-            toAdd[values + i] = newValue
+            if (toAdd[newValue] === undefined || parseInt(toAdd[newValue]) < parseInt(values + i)) {
+              toAdd[newValue] = values + i
+            }
           }
+          delete currentAluStates[values]
         }
-        currentAluStates = reduceStates(toAdd)
+        const temp2: object = {}
+        for (let key of Object.keys(toAdd)) {
+          temp2[toAdd[key]] = key.split(",").map(value => parseInt(value))
+          delete toAdd[key]
+        }
+
+        currentAluStates = temp2
         console.log("Current States", Object.keys(currentAluStates).length)
         break
       case OPERATION.ADD:
