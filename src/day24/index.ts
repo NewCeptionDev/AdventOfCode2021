@@ -107,7 +107,9 @@ const applyInstructionsToInputs = (instructions: Instruction[], currentAluStates
             newValue[instruction.operand1] = i
 
             if (toAdd[newValue] === undefined || parseInt(toAdd[newValue]) < parseInt(values + i)) {
-              toAdd[newValue] = values + i
+              if (values.length <= 3 || (parseInt(values[0]) > 7 && parseInt(values[1]) > 7) && parseInt(values[2]) > 7) {
+                toAdd[newValue] = values === "0" ? i : values + i
+              }
             }
           }
           delete currentAluStates[values]
@@ -202,7 +204,7 @@ const goA = (input) => {
   let largestNumber: number = Number.MIN_SAFE_INTEGER
 
   for (let state of Object.keys(states)) {
-    if (states[state][VARIABLE.Z] === 0 && parseInt(state) < largestNumber) {
+    if (states[state][VARIABLE.Z] === 0 && parseInt(state) > largestNumber) {
       largestNumber = parseInt(state)
     }
 
