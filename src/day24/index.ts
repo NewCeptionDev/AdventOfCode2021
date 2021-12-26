@@ -69,10 +69,10 @@ const parseInstruction = (line: string): Instruction => {
   }
 }
 
-const reduceStates = (states: {}) => {
+const reduceStates = (states: {}, maxSearch: boolean) => {
   const temp: object = {}
   for (let state of Object.keys(states)) {
-    if (temp[states[state]] === undefined || parseInt(temp[states[state]]) < parseInt(state)) {
+    if (temp[states[state]] === undefined || (maxSearch ? parseInt(temp[states[state]]) < parseInt(state) : parseInt(temp[states[state]]) > parseInt(state))) {
       temp[states[state]] = state
     }
     delete states[state]
@@ -87,7 +87,7 @@ const reduceStates = (states: {}) => {
   return temp2
 }
 
-const applyInstructionsToInputs = (instructions: Instruction[], currentAluStates: object): object => {
+const applyInstructionsToInputs = (instructions: Instruction[], currentAluStates: object, maxSearch: boolean, stateRestrictions: Function): object => {
   let numbersDone: number = 0
   for (let i = 0; i < instructions.length; i++) {
     const instruction = instructions[i]
@@ -99,15 +99,15 @@ const applyInstructionsToInputs = (instructions: Instruction[], currentAluStates
         console.log("New Inp Operation")
         console.log("Numbers done:", numbersDone)
         numbersDone++
-        currentAluStates = reduceStates(currentAluStates)
+        currentAluStates = reduceStates(currentAluStates, maxSearch)
         const toAdd = {}
         for (let values of Object.keys(currentAluStates)) {
           for (let i = 1; i <= 9; i++) {
             const newValue = currentAluStates[values].slice(0)
             newValue[instruction.operand1] = i
 
-            if (toAdd[newValue] === undefined || parseInt(toAdd[newValue]) < parseInt(values + i)) {
-              if (values.length <= 3 || (parseInt(values[0]) > 7 && parseInt(values[1]) > 7) && parseInt(values[2]) > 7) {
+            if (toAdd[newValue] === undefined || (maxSearch ? parseInt(toAdd[newValue]) < parseInt(values + i) : parseInt(toAdd[newValue]) > parseInt(values + i))) {
+              if (values.length <= 3 || stateRestrictions(values)) {
                 toAdd[newValue] = values === "0" ? i : values + i
               }
             }
@@ -199,7 +199,7 @@ const goA = (input) => {
 
   const possibleAluStates: number[][] = [[0, 0, 0, 0]]
 
-  const states: object = applyInstructionsToInputs(instructions, possibleAluStates)
+  const states: object = applyInstructionsToInputs(instructions, possibleAluStates, true, (values) => (parseInt(values[0]) > 8 && parseInt(values[1]) > 7) && parseInt(values[2]) > 7)
 
   let largestNumber: number = Number.MIN_SAFE_INTEGER
 
@@ -214,19 +214,41 @@ const goA = (input) => {
 }
 
 const goB = (input) => {
-  return
+  const lines: string[] = splitToLines(input)
+
+  const instructions: Instruction[] = lines.map(line => parseInstruction(line))
+
+  const possibleAluStates: number[][] = [[0, 0, 0, 0]]
+
+  const states: object = applyInstructionsToInputs(instructions, possibleAluStates, false, (values) => (parseInt(values[0]) > 1 && parseInt(values[0]) < 3 && parseInt(values[1]) < 8) && parseInt(values[2]) < 8)
+
+  let smallestNumber: number = Number.MAX_SAFE_INTEGER
+
+  for (let state of Object.keys(states)) {
+    if (states[state][VARIABLE.Z] === 0) {
+      console.log("found one with smaller")
+    }
+    if (states[state][VARIABLE.Z] === 0 && parseInt(state) < smallestNumber) {
+      smallestNumber = parseInt(state)
+    }
+  }
+
+  return smallestNumber
 }
 
 /* Tests */
 
-test(reduceStates({ "32": [1, 2, 3, 5], "4": [3], "12": [1, 2, 3, 5], "231": [3] }), { "32": [1, 2, 3, 5], "231": [3] })
+test(reduceStates({ "32": [1, 2, 3, 5], "4": [3], "12": [1, 2, 3, 5], "231": [3] }, true), {
+  "32": [1, 2, 3, 5],
+  "231": [3],
+})
 
 /* Results */
 
 console.time("Time")
-const resultA = goA(input)
+//const resultA = goA(input)
 const resultB = goB(input)
 console.timeEnd("Time")
 
-console.log("Solution to part 1:", resultA)
+//console.log("Solution to part 1:", resultA)
 console.log("Solution to part 2:", resultB)
