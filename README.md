@@ -33,6 +33,8 @@ npm start day<N>
 
 - TypeScript
 
+<br>
+
 ## Repositories for other years of Advent of Code
 I have participated in multiple years of Advent of Code, using multiple languages.<br>
 You can find all of my solution repositories [here](https://github.com/NewCeptionDev?tab=repositories&q=AdventOfCode&type=&language=&sort=).
